@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>India Weather App</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      transition: background 1s ease;
+      background-size:cover;
+     
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .navbar {
+      background-color: rgba(230, 241, 247, 0.8);
+      padding: 1rem;
+    }
+
+    .navbar .navbar-brand {
+      font-weight: bold;
+    }
+
+    .navbar .nav-item .nav-link {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .date-time {
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+    }
+
+    .weather-card {
+      background: rgba(174, 200, 233, 0.9);
+      border-radius: 30px;
+      box-shadow: 2 16px 20px rgba(55, 191, 233, 0.2);
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+      margin: auto;
+      margin-top: 150px;
+    }
+
+    .night .weather-card {
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .weather-icon {
+      width: 100px;
+      height: 100px;
+      animation: bounce 1.5s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    footer {
+      background: rgba(230, 241, 247, 8);
+      border-top: 1px solid #b3d1ea;
+      opacity:  9px;
+    }
+
+    .btn-primary, .btn-outline-primary {
+      border-radius: 20px !important;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/wea/w.html">🌤️ Get India Weather</a>
+      <div class="ms-auto text-end">
+        <div><span id="greeting">Hi 👋 Good Morning</span></div>
+        <div class="date-time" id="dateTime"></div>
+        <button class="btn btn-outline-primary btn-sm mt-7 "  ><a href="/sign/form.html">Sign in</a></button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="weather-card">
+      <h2> 🌦️ Check Weather 🌤️</h2>
+      <form id="weatherForm">
+        <div class="mb-4">
+          <input type="text" class="form-control" id="stateInput" placeholder="Enter State (optional)">
+        </div>
+        <div class="mb-3">
+          <input type="text" class="form-control" id="cityInput" placeholder="Enter City" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Get Weather</button>
+      </form>
+
+      <div id="weatherResult" class="mt-4"></div>
+    </div>
+  </div>
+
+  <footer class="text-center py-2 fixed-bottom" style="background: rgba(230,241,247,8); border-top: 1px solid #b3d1ea;">
+    <div class="container">
+      <p class="mb-1">&copy; 2025 India Weather App. All rights reserved.</p>
+      <p class="mb-0">
+        <a href="mailto:support@indiaweather.com" class="text-primary">Contact Support</a> |
+        <a href="#" class="text-primary">Privacy Policy</a>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    const form = document.getElementById("weatherForm");
+    const result = document.getElementById("weatherResult");
+    const body = document.body;
+    const dateTimeEl = document.getElementById("dateTime");
+    const greetingEl = document.getElementById("greeting");
+
+    // Background image slideshow
+    const bgImages = [
+      'https://media.istockphoto.com/id/1007768414/photo/blue-sky-with-bright-sun-and-clouds.jpg?s=612x612&w=0&k=20&c=MGd2-v42lNF7Ie6TtsYoKnohdCfOPFSPQt5XOz4uOy4=',
+      'data:image/jpeg;base64,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',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvWiz4BcRqaQ1J0s481hLhL-jbm0XdJIyt-owiCw28RMgAfAy12RfitwDvKjn2Tf3OK_0&usqp=CAU',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGfbTsWYWjHNV4sbd8Ro9KQwEAI7IR7E6P8w&s',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2zrC7c631jn08b6abtGa1gB7ZWafafnQqdA&s'
+    ];
+    let currentBg = 0;
+
+    function changeBackground() {
+      body.style.backgroundImage = `url('${bgImages[currentBg]}')`;
+      currentBg = (currentBg + 1) % bgImages.length;
+    }
+    setInterval(changeBackground, 8000); // every 10 seconds
+    changeBackground();
+
+    // Live date & time + greeting
+    function updateDateTime() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const dateStr = now.toLocaleDateString(undefined, options);
+      const timeStr = now.toLocaleTimeString();
+      dateTimeEl.innerText = `${dateStr}, ${timeStr}`;
+
+      const hour = now.getHours();
+      if (hour < 12) {
+        greetingEl.textContent = 'Hi 👋 Good Morning';
+      } else if (hour < 18) {
+        greetingEl.textContent = 'Hi 👋 Good Afternoon';
+      } else {
+        greetingEl.textContent = 'Hi 👋 Good Evening';
+      }
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // Weather fetch logic
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const city = document.getElementById("cityInput").value.trim();
+      const apiKey = "12bcdb2ce4ee960bd50756723275bc4a"; // Replace with your OpenWeatherMap API key
+
+      result.innerHTML = "<p>Loading...</p>";
+
+      try {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},IN&appid=${apiKey}&units=metric`);
+        if (!response.ok) throw new Error("City not found");
+        const data = await response.json();
+        console.log(data)
+
+        const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        const weatherMain = data.weather[0].main.toLowerCase();
+
+        result.innerHTML = `
+          <h3>${data.name}, ${data.sys.country}</h3>
+          <img src="${iconUrl}" class="weather-icon" alt="Weather Icon">
+          <p><strong>${data.weather[0].main}</strong> - ${data.weather[0].description}</p>
+          <p>Temperature: ${data.main.temp} °C</p>
+          <p>Humidity: ${data.main.humidity}%</p>
+          <p>Wind: ${data.wind.speed} m/s</p>
+        `;
+      } catch (error) {
+        result.innerHTML = `<p class="text-danger">${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+
+</html>
